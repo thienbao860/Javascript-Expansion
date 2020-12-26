@@ -1,6 +1,5 @@
 package com.extendedclip.papi.expansion.javascript;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class ExpansionUtils {
 
-    public static final String DEFAULT_ENGINE = "nashorn";
+    public static final String DEFAULT_ENGINE = "graal.js";
     public static final String PREFIX = "[PAPI] [Javascript-Expansion] ";
     private static final Logger logger = Bukkit.getLogger();
 
@@ -66,26 +65,29 @@ public class ExpansionUtils {
         }
     }
 
-    // Only support for Nashorn engine!
+    // Only support for Graal engine!
     protected static Object jsonToJava(Object jsObj) {
-        if (jsObj instanceof ScriptObjectMirror) {
-            ScriptObjectMirror jsObjectMirror = (ScriptObjectMirror) jsObj;
-            if (jsObjectMirror.isArray()) {
-                List<Object> list = new ArrayList<>();
-                for (Map.Entry<String, Object> entry : jsObjectMirror.entrySet()) {
-                    list.add(jsonToJava(entry.getValue()));
-                }
-                return list;
-            } else {
-                Map<String, Object> map = new HashMap<>();
-                for (Map.Entry<String, Object> entry : jsObjectMirror.entrySet()) {
-                    map.put(entry.getKey(), jsonToJava(entry.getValue()));
-                }
-                return map;
-            }
-        } else {
-            return jsObj;
-        }
+        Class<?> declaring = jsObj.getClass().getDeclaringClass();
+        System.out.println(declaring.getName());
+        return jsObj;
+//        if (jsObj instanceof Value) {
+//            Value jsObjectMirror = (Value) jsObj;
+//            if (jsObjectMirror.hasArrayElements()) {
+//                List<Object> list = new ArrayList<>();
+//                for (Map.Entry<String, Object> entry : jsObjectMirror) {
+//                    list.add(jsonToJava(entry.getValue()));
+//                }
+//                return list;
+//            } else {
+//                Map<String, Object> map = new HashMap<>();
+//                for (Map.Entry<String, Object> entry : jsObjectMirror.entrySet()) {
+//                    map.put(entry.getKey(), jsonToJava(entry.getValue()));
+//                }
+//                return map;
+//            }
+//        } else {
+//            return jsObj;
+//        }
     }
 
     protected static Object ymlToJavaObj(Object obj) {

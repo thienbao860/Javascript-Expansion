@@ -119,6 +119,7 @@ public class JavascriptPlaceholdersConfig {
             ExpansionUtils.errorLog("Could not create directory: " + directory.getPath(), e);
         }
 
+        //Script initialization
         for (String identifier : config.getKeys(false)) {
             final String fileName = config.getString(identifier + ".file");
             if (!config.contains(identifier + ".file") || fileName == null) {
@@ -132,6 +133,7 @@ public class JavascriptPlaceholdersConfig {
                 ExpansionUtils.infoLog(scriptFile.getName() + " does not exist. Creating one for you...");
 
                 try {
+                    scriptFile.getParentFile().mkdir();
                     scriptFile.createNewFile();
                     ExpansionUtils.infoLog(scriptFile.getName() + " created! Add your javascript to this file and use '/jsexpansion reload' to load it!");
                 } catch (IOException e) {

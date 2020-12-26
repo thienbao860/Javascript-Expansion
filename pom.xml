@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.extendedclip.papi.expansion.javascript</groupId>
   <artifactId>javascript-expansion</artifactId>
-  <version>1.6.0</version>
+  <version>1.7.0</version>
   <name>PAPI-Expansion-Javascript</name>
   <description>PlaceholderAPI expansion for javascript placeholders</description>
     
@@ -16,12 +16,12 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
     </repositories>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.1-R0.1-SNAPSHOT</version>
+            <version>1.16.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -30,9 +30,52 @@
           <version>2.10.9</version>
          <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.js/js -->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine -->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.sdk/graal-sdk -->
+        <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>graal-sdk</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.truffle/truffle-api -->
+        <dependency>
+            <groupId>org.graalvm.truffle</groupId>
+            <artifactId>truffle-api</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.regex/regex -->
+        <dependency>
+            <groupId>org.graalvm.regex</groupId>
+            <artifactId>regex</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
     </dependencies>
-    
-    <build>     
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -61,6 +104,4 @@
             </plugin>
         </plugins>
     </build>
-
-    
 </project>

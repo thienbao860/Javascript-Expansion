@@ -22,15 +22,15 @@ package com.extendedclip.papi.expansion.javascript;
 
 import com.extendedclip.papi.expansion.javascript.cloud.GithubScript;
 import com.extendedclip.papi.expansion.javascript.command.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JavascriptExpansionCommands extends Command {
@@ -39,6 +39,7 @@ public class JavascriptExpansionCommands extends Command {
     private final String PERMISSION = "placeholderapi.js.admin";
     private final String command;
     private List<ICommand> subCommands;
+    private CommandMap commandMap;
 
     public JavascriptExpansionCommands(JavascriptExpansion expansion) {
         super("jsexpansion");
@@ -48,6 +49,15 @@ public class JavascriptExpansionCommands extends Command {
         this.setUsage("/" + command + " <args>");
         this.setAliases(new ArrayList<>(Arrays.asList("javascriptexpansion", "jsexp")));
         this.setPermission(PERMISSION);
+
+        try {
+            final Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            field.setAccessible(true);
+            commandMap = (CommandMap) field.get(Bukkit.getServer());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            ExpansionUtils.errorLog("An error occurred while accessing CommandMap.", e, true);
+        }
+
         initCommands();
     }
 
@@ -155,6 +165,46 @@ public class JavascriptExpansionCommands extends Command {
                     "&e/" + command + " git info [name] &7- &fGet the description and url of a specific script."
             );
         }
+    }
+
+    protected void unregisterCommand() {
+        if (commandMap != null) {
+
+            try {
+                Class<? extends CommandMap> cmdMapClass = commandMap.getClass();
+                final Field f;
+
+                //Check if the server's in 1.13+
+                if (cmdMapClass.getSimpleName().equals("CraftCommandMap")) {
+                    f = cmdMapClass.getSuperclass().getDeclaredField("knownCommands");
+                } else {
+                    f = cmdMapClass.getDeclaredField("knownCommands");
+                }
+
+                f.setAccessible(true);
+                Map<String, Command> knownCmds = (Map<String, Command>) f.get(commandMap);
+                knownCmds.remove(getName());
+                for (String alias : getAliases()) {
+                    if (knownCmds.containsKey(alias) && knownCmds.get(alias).toString().contains(getName())) {
+                        knownCmds.remove(alias);
+                    }
+                }
+
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            unregister(commandMap);
+        }
+    }
+
+    protected void registerCommand() {
+        if (commandMap == null) {
+            return;
+        }
+
+        commandMap.register("papi" + getName(), this);
+        this.isRegistered();
     }
 
     public String[] sliceFirstArr(String[] args) {

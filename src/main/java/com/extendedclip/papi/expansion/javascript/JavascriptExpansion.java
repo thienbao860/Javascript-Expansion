@@ -48,21 +48,12 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
     private boolean debug;
     private GithubScriptManager githubManager;
     private JavascriptExpansionCommands commands;
-    private CommandMap commandMap;
     private String argument_split;
 
     public JavascriptExpansion() {
         instance = this;
         this.VERSION = getClass().getPackage().getImplementationVersion();
         this.scripts = new HashSet<>();
-
-        try {
-            final Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            field.setAccessible(true);
-            commandMap = (CommandMap) field.get(Bukkit.getServer());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            ExpansionUtils.errorLog("An error occurred while accessing CommandMap.", e, true);
-        }
     }
 
     @Override
@@ -129,13 +120,14 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
             githubManager.fetch();
         }
 
-        registerCommand();
+        commands = new JavascriptExpansionCommands(this);
+        commands.registerCommand();
         return super.register();
     }
 
     @Override
     public void clear() {
-        unregisterCommand();
+        commands.unregisterCommand();
 
         scripts.forEach(script -> {
             script.saveData();
@@ -254,44 +246,5 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         this.githubManager = manager;
     }
 
-    private void unregisterCommand() {
-        if (commandMap != null && commands != null) {
 
-            try {
-                Class<? extends CommandMap> cmdMapClass = commandMap.getClass();
-                final Field f;
-
-                //Check if the server's in 1.13+
-                if (cmdMapClass.getSimpleName().equals("CraftCommandMap")) {
-                    f = cmdMapClass.getSuperclass().getDeclaredField("knownCommands");
-                } else {
-                    f = cmdMapClass.getDeclaredField("knownCommands");
-                }
-
-                f.setAccessible(true);
-                Map<String, Command> knownCmds = (Map<String, Command>) f.get(commandMap);
-                knownCmds.remove(commands.getName());
-                for (String alias : commands.getAliases()) {
-                    if (knownCmds.containsKey(alias) && knownCmds.get(alias).toString().contains(commands.getName())) {
-                        knownCmds.remove(alias);
-                    }
-                }
-
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
-            commands.unregister(commandMap);
-        }
-    }
-
-    private void registerCommand() {
-        if (commandMap == null) {
-            return;
-        }
-
-        commands = new JavascriptExpansionCommands(this);
-        commandMap.register("papi" + commands.getName(), commands);
-        commands.isRegistered();
-    }
 }
