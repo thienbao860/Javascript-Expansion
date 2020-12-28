@@ -33,8 +33,6 @@ import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JavascriptPlaceholder {
 
@@ -44,10 +42,10 @@ public class JavascriptPlaceholder {
     private ScriptData scriptData;
     private final File dataFile;
     private YamlConfiguration yaml;
-    private final Pattern pattern;
+    //private final Pattern pattern;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public JavascriptPlaceholder(ScriptEngine engine, String identifier, String script) {
+    public JavascriptPlaceholder(final ScriptEngine engine, String identifier, String script) {
         Validate.notNull(engine, "ScriptEngine can not be null");
         Validate.notNull(identifier, "Identifier can not be null");
         Validate.notNull(script, "Script can not be null");
@@ -62,16 +60,14 @@ public class JavascriptPlaceholder {
             directory.mkdirs();
         }
 
-        pattern = Pattern.compile("//.*|/\\*[\\S\\s]*?\\*/|%([^%]+)%");
         scriptData = new ScriptData();
         dataFile = new File(directory, identifier + "_data.yml");
-        engine.put("Data", scriptData);
-        engine.put("DataVar", scriptData.getData());
-        engine.put("BukkitServer", Bukkit.getServer());
-        engine.put("Expansion", JavascriptExpansion.getInstance());
-        engine.put("Placeholder", this);
-        engine.put("PlaceholderAPI", PlaceholderAPI.class);
-
+        this.engine.put("Data", scriptData);
+        this.engine.put("DataVar", scriptData.getData());
+        this.engine.put("BukkitServer", Bukkit.getServer());
+        this.engine.put("Expansion", JavascriptExpansion.getInstance());
+        this.engine.put("Placeholder", this);
+        this.engine.put("PlaceholderAPI", PlaceholderAPI.class);
     }
 
     public String getIdentifier() {
@@ -80,19 +76,7 @@ public class JavascriptPlaceholder {
 
     public String evaluate(OfflinePlayer player, String... args) {
 
-        // A checker to deny all placeholders inside comment codes
-        Matcher matcher = pattern.matcher(script);
-        StringBuffer buffer = new StringBuffer();
-
-        while (matcher.find()) {
-            String matched = matcher.group(0);
-            if (!matched.startsWith("%") || matched.startsWith("/*") || matched.startsWith("//")) continue;
-
-            matcher.appendReplacement(buffer, PlaceholderAPI.setPlaceholders(player, matched));
-        }
-
-        matcher.appendTail(buffer);
-        String exp = buffer.toString();
+        String exp = String.join("", script);
 
         try {
             String[] arguments = null;
@@ -120,8 +104,10 @@ public class JavascriptPlaceholder {
             }
 
             engine.put("OfflinePlayer", player);
+            engine.put("Parser", new JavascriptParser(player));
             Object result = engine.eval(exp);
-            return result != null ? PlaceholderAPI.setBracketPlaceholders(player, result.toString()) : "";
+            result = ExpansionUtils.jsonToJava(result);
+            return PlaceholderAPI.setBracketPlaceholders(player, result.toString());
 
         } catch (ScriptException ex) {
             ExpansionUtils.errorLog("An error occurred while executing the script '" + identifier + "':\n\t" + ex.getMessage(), null);
@@ -208,5 +194,22 @@ public class JavascriptPlaceholder {
             this.scriptData = null;
         }
         this.yaml = null;
+    }
+
+    public class JavascriptParser {
+
+        private final OfflinePlayer player;
+
+        public JavascriptParser(OfflinePlayer player) {
+            this.player = player;
+        }
+
+        public String parse(String msg) {
+            return PlaceholderAPI.setPlaceholders(player, msg);
+        }
+
+        public String parseBracket(String msg) {
+            return PlaceholderAPI.setBracketPlaceholders(player, msg);
+        }
     }
 }

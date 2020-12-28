@@ -66,4 +66,5 @@ public class ScriptData {
     public boolean isEmpty() {
         return map.isEmpty();
     }
+
 }

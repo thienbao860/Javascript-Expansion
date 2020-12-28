@@ -21,20 +21,17 @@
 package com.extendedclip.papi.expansion.javascript;
 
 import com.extendedclip.papi.expansion.javascript.cloud.GithubScriptManager;
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.Cacheable;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandMap;
 import org.jetbrains.annotations.NotNull;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-import java.lang.reflect.Field;
+import javax.script.*;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JavascriptExpansion extends PlaceholderExpansion implements Cacheable, Configurable {
@@ -78,10 +75,17 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         if (globalEngine == null) {
             try {
                 globalEngine = new ScriptEngineManager(null).getEngineByName(getString("engine", defaultEngine));
-            } catch (NullPointerException ex) {
+            }
+            catch (NullPointerException ex) {
                 ExpansionUtils.warnLog("Javascript engine type was invalid! Defaulting to '" + defaultEngine + "'", null);
                 globalEngine = new ScriptEngineManager(null).getEngineByName(defaultEngine);
             }
+
+            System.setProperty("polyglot.js.nashorn-compat", "true");
+            Bindings bindings = globalEngine.createBindings();
+            bindings.put("polyglot.js.allowAllAccess", true);
+            globalEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+
         }
 
         argument_split = getString("argument_split", ",");

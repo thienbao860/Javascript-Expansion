@@ -47,7 +47,7 @@ public class JavascriptExpansionCommands extends Command {
         this.expansion = expansion;
         this.setDescription("Javascript expansion commands");
         this.setUsage("/" + command + " <args>");
-        this.setAliases(new ArrayList<>(Arrays.asList("javascriptexpansion", "jsexp")));
+        this.setAliases(Arrays.asList("javascriptexpansion", "jsexp", "jse"));
         this.setPermission(PERMISSION);
 
         try {
@@ -106,9 +106,8 @@ public class JavascriptExpansionCommands extends Command {
         return true;
     }
 
-    //TODO: This thing here has to be organized thoroughly later...
     @Override
-    public List<String> tabComplete(CommandSender sender, @NotNull String alias, String[] args) throws IllegalArgumentException {
+    public List<String> tabComplete(CommandSender sender, @NotNull String alias, String[] args) {
         if (!sender.hasPermission(PERMISSION)) {
             return Collections.emptyList();
         }
@@ -202,9 +201,7 @@ public class JavascriptExpansionCommands extends Command {
         if (commandMap == null) {
             return;
         }
-
         commandMap.register("papi" + getName(), this);
-        this.isRegistered();
     }
 
     public String[] sliceFirstArr(String[] args) {

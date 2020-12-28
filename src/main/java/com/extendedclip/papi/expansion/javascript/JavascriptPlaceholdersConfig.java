@@ -24,6 +24,8 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.io.File;
@@ -168,6 +170,10 @@ public class JavascriptPlaceholdersConfig {
                 continue;
             }
 
+            Bindings bindings = engine.createBindings();
+            bindings.put("polyglot.js.allowAllAccess", true);
+            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+
             final JavascriptPlaceholder placeholder = new JavascriptPlaceholder(engine, identifier, script);
             final boolean added = ex.addJSPlaceholder(placeholder);
 
@@ -175,11 +181,11 @@ public class JavascriptPlaceholdersConfig {
                 if (placeholder.loadData()) {
                     ExpansionUtils.infoLog("Data for placeholder &b" + identifier + "&r has been loaded");
                 }
-
                 ExpansionUtils.infoLog("Placeholder &b%javascript_" + identifier + "%&r has been loaded");
             } else {
                 ExpansionUtils.warnLog("Javascript placeholder %javascript_" + identifier + "% is duplicated!", null);
             }
+
         }
         return ex.getAmountLoaded();
     }

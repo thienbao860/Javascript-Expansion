@@ -24,6 +24,7 @@
             <version>1.16.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
          <groupId>me.clip</groupId>
           <artifactId>placeholderapi</artifactId>
@@ -38,11 +39,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.graalvm.js/js -->
         <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js</artifactId>
             <version>20.3.0</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine -->
@@ -72,6 +73,21 @@
             <artifactId>regex</artifactId>
             <version>20.3.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.compiler/compiler -->
+        <dependency>
+            <groupId>org.graalvm.compiler</groupId>
+            <artifactId>compiler</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.graalvm.compiler/compiler-management -->
+        <dependency>
+            <groupId>org.graalvm.compiler</groupId>
+            <artifactId>compiler-management</artifactId>
+            <version>20.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.graalvm.regex/regex -->
 
     </dependencies>
 
@@ -104,4 +120,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
