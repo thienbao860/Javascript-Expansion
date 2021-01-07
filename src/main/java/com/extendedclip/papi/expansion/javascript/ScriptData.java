@@ -25,14 +25,17 @@ import java.util.Map;
 
 public class ScriptData {
 
-    private Map<String, Object> map;
-
-    public ScriptData(Map<String, Object> data) {
-        this.map = data;
-    }
+    private final Map<String, Object> tempMap;
+    private final Map<String, Object> map;
 
     public ScriptData() {
-        this.map = new HashMap<>();
+        this(null);
+    }
+
+    public ScriptData(Map<String, Object> data) {
+        this.tempMap = new HashMap<>();
+        this.map = data == null ? new HashMap<>() : data;
+
     }
 
     public Map<String, Object> getData() {
@@ -65,6 +68,38 @@ public class ScriptData {
 
     public boolean isEmpty() {
         return map.isEmpty();
+    }
+
+    public boolean isTempEmpty() {
+        return tempMap.isEmpty();
+    }
+
+    public Map<String, Object> getTempData() {
+        return tempMap;
+    }
+
+    public void clearTemp() {
+        tempMap.clear();
+    }
+
+    public boolean tempExists(String key) {
+        return tempMap.get(key) != null;
+    }
+
+    public Object getTemp(String key) {
+        return tempMap.get(key);
+    }
+
+    public void removeTemp(String key) {
+        tempMap.put(key, null);
+    }
+
+    public void setTemp(String key, Object value) {
+        tempMap.put(key, ExpansionUtils.jsonToJava(value));
+    }
+
+    public void setTempIfNull(String key, Object value) {
+        tempMap.putIfAbsent(key, ExpansionUtils.jsonToJava(value));
     }
 
 }
