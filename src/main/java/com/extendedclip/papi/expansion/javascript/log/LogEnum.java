@@ -1,0 +1,10 @@
+package com.extendedclip.papi.expansion.javascript.log;
+
+public enum LogEnum {
+
+    FAILED_SPEC, FAILED_CREATE, FAILED_ENGINE, FAILED_PLACEHOLDER,
+    EMPTY_FILE, EMPTY_ENGINE, SUCCESSFUL_FILE,
+    LOADED_DATA, LOADED_PLACEHOLDER,
+    INVALID_ENGINE
+
+}

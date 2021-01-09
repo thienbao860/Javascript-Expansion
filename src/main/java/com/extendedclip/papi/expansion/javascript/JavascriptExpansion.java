@@ -21,7 +21,8 @@
 package com.extendedclip.papi.expansion.javascript;
 
 import com.extendedclip.papi.expansion.javascript.cloud.GithubScriptManager;
-import me.clip.placeholderapi.PlaceholderAPI;
+import com.extendedclip.papi.expansion.javascript.manager.ConfigManager;
+import com.extendedclip.papi.expansion.javascript.manager.JavascriptPlaceholdersManager;
 import me.clip.placeholderapi.expansion.Cacheable;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -30,27 +31,27 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.script.*;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class JavascriptExpansion extends PlaceholderExpansion implements Cacheable, Configurable {
 
     private ScriptEngine globalEngine = null;
 
-    private JavascriptPlaceholdersConfig config;
+    private JavascriptPlaceholdersManager config;
     private final Set<JavascriptPlaceholder> scripts;
     private final String VERSION;
     private static JavascriptExpansion instance;
-    private boolean debug;
-    private GithubScriptManager githubManager;
     private JavascriptExpansionCommands commands;
     private String argument_split;
+
+    private final ConfigManager confManager;
+    private GithubScriptManager githubManager;
 
     public JavascriptExpansion() {
         instance = this;
         this.VERSION = getClass().getPackage().getImplementationVersion();
         this.scripts = new HashSet<>();
+        this.confManager = new ConfigManager(this);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
 
     @Override
     public boolean register() {
-        System.setProperty("http.agent", "Chrome");
+
         String defaultEngine = ExpansionUtils.DEFAULT_ENGINE;
 
         if (globalEngine == null) {
@@ -89,20 +90,19 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
 
         }
 
-        argument_split = getString("argument_split", ",");
+        argument_split = getConfigManager().getSplitStr();
         if (argument_split.equals("_")) {
             argument_split = ",";
-            ExpansionUtils.warnLog("Underscore character will not be allowed for splitting. Defaulting to ',' for this", null);
+            ExpansionUtils.warnLog("Underscore character ('_') will not be allowed for splitting. Defaulting to ',' for this", null);
         }
 
-        debug = (boolean) get("debug", false);
-        config = new JavascriptPlaceholdersConfig(this);
+        config = new JavascriptPlaceholdersManager(this);
 
         int amountLoaded = config.loadPlaceholders();
         ExpansionUtils.infoLog(amountLoaded + " script" + ExpansionUtils.plural(amountLoaded) + " loaded!");
 
 
-        if (debug) {
+        if (getConfigManager().debugModeEnabled()) {
             ExpansionUtils.infoLog("Java version: " + System.getProperty("java.version"));
     
             final ScriptEngineManager manager = new ScriptEngineManager(null);
@@ -120,13 +120,14 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
             }
         }
 
-        if ((boolean) get("github_script_downloads", false)) {
+        if (getConfigManager().gitDownloadEnabled()) {
             githubManager = new GithubScriptManager(this);
             githubManager.fetch();
         }
 
         commands = new JavascriptExpansionCommands(this);
         commands.registerCommand();
+
         return super.register();
     }
 
@@ -159,7 +160,9 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
             if (identifier.startsWith(script.getIdentifier() + "_")) {
                 identifier = identifier.replaceFirst(script.getIdentifier() + "_", "");
 
-                return !identifier.contains(argument_split) ? script.evaluate(player, identifier) : script.evaluate(player, identifier.split(argument_split));
+                return !identifier.contains(argument_split) ?
+                        script.evaluate(player, identifier) :
+                        script.evaluate(player, identifier.split(argument_split));
             }
 
             if (identifier.equalsIgnoreCase(script.getIdentifier())) {
@@ -213,7 +216,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         return globalEngine;
     }
 
-    public JavascriptPlaceholdersConfig getConfig() {
+    public JavascriptPlaceholdersManager getConfig() {
         return config;
     }
 
@@ -235,7 +238,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         });
 
         scripts.clear();
-        config.reload();
+        getConfigManager().reload();
         return config.loadPlaceholders();
     }
 
@@ -252,4 +255,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
     }
 
 
+    public ConfigManager getConfigManager() {
+        return confManager;
+    }
 }

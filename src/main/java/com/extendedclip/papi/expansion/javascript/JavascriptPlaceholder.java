@@ -171,9 +171,11 @@ public class JavascriptPlaceholder {
             return false;
         }
 
-        if (scriptData == null)
+        if (scriptData == null) {
             scriptData = new ScriptData();
-        else scriptData.clear();
+        } else {
+            scriptData.clear();
+        }
 
         keys.forEach(key -> scriptData.set(key, ExpansionUtils.ymlToJavaObj(yaml.get(key))));
 

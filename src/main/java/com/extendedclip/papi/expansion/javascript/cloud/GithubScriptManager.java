@@ -22,7 +22,7 @@ package com.extendedclip.papi.expansion.javascript.cloud;
 
 import com.extendedclip.papi.expansion.javascript.ExpansionUtils;
 import com.extendedclip.papi.expansion.javascript.JavascriptExpansion;
-import com.extendedclip.papi.expansion.javascript.JavascriptPlaceholdersConfig;
+import com.extendedclip.papi.expansion.javascript.manager.ConfigManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
@@ -82,11 +82,11 @@ public class GithubScriptManager {
             }
 
             Bukkit.getScheduler().runTask(expansion.getPlaceholderAPI(), () -> {
-                JavascriptPlaceholdersConfig config = expansion.getConfig();
-                config.load().set(script.getName() + ".file", script.getName() + ".js");
-                config.load().set(script.getName() + ".engine", "javascript");
+                ConfigManager config = expansion.getConfigManager();
+                config.loadData().set(script.getName() + ".file", script.getName() + ".js");
+                config.loadData().set(script.getName() + ".engine", "javascript");
 
-                config.save();
+                config.saveData();
             });
         });
     }
