@@ -200,8 +200,6 @@ public class JavascriptPlaceholdersConfig {
             return null;
         }
 
-//        This thing is just in case, who needs it now..
-//        return sb.toString().replaceAll("//.*|/\\*(?:[^/*|*/]|\\\\.|\\n\\*)*\\*/", "");
         return sb.toString();
     }
 }

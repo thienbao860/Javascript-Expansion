@@ -70,6 +70,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
 
     @Override
     public boolean register() {
+        System.setProperty("http.agent", "Chrome");
         String defaultEngine = ExpansionUtils.DEFAULT_ENGINE;
 
         if (globalEngine == null) {

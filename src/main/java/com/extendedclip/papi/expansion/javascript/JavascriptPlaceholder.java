@@ -20,6 +20,8 @@
  */
 package com.extendedclip.papi.expansion.javascript;
 
+import com.extendedclip.papi.expansion.javascript.parser.JavascriptParser;
+import com.extendedclip.papi.expansion.javascript.parser.UtilityParser;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.apache.commons.lang.Validate;
@@ -28,6 +30,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.File;
@@ -42,7 +45,7 @@ public class JavascriptPlaceholder {
     private ScriptData scriptData;
     private final File dataFile;
     private YamlConfiguration yaml;
-    //private final Pattern pattern;
+    private boolean firstInit;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public JavascriptPlaceholder(final ScriptEngine engine, String identifier, String script) {
@@ -51,6 +54,7 @@ public class JavascriptPlaceholder {
         Validate.notNull(script, "Script can not be null");
 
         String dir = PlaceholderAPIPlugin.getInstance().getDataFolder() + "/javascripts/javascript_data";
+        this.firstInit = true;
         this.engine = engine;
         this.identifier = identifier;
         this.script = script;
@@ -68,6 +72,7 @@ public class JavascriptPlaceholder {
         this.engine.put("Expansion", JavascriptExpansion.getInstance());
         this.engine.put("Placeholder", this);
         this.engine.put("PlaceholderAPI", PlaceholderAPI.class);
+        this.engine.put("UtilityParser", UtilityParser.getInstance());
     }
 
     public String getIdentifier() {
@@ -75,8 +80,6 @@ public class JavascriptPlaceholder {
     }
 
     public String evaluate(OfflinePlayer player, String... args) {
-
-        String exp = String.join("", script);
 
         try {
             String[] arguments = null;
@@ -105,9 +108,18 @@ public class JavascriptPlaceholder {
 
             engine.put("OfflinePlayer", player);
             engine.put("Parser", new JavascriptParser(player));
-            Object result = engine.eval(exp);
+            Object result = engine.eval(script);
             result = ExpansionUtils.jsonToJava(result);
-            return PlaceholderAPI.setBracketPlaceholders(player, result.toString());
+
+            if (firstInit) {
+                firstInit = false;
+                Invocable inv = (Invocable) engine;
+                try {
+                    inv.invokeFunction("firstInit");
+                } catch (ScriptException | NoSuchMethodException ignored) { }
+            }
+
+            return result != null ? PlaceholderAPI.setPlaceholders(player, result.toString()) : "";
 
         } catch (ScriptException ex) {
             ExpansionUtils.errorLog("An error occurred while executing the script '" + identifier + "':\n\t" + ex.getMessage(), null);
@@ -177,8 +189,6 @@ public class JavascriptPlaceholder {
             return;
         }
 
-        // Function for merging JSON.
-        // TODO: This will be removed along with Nashorn in a later future
         scriptData.getData().forEach((key, value) -> yaml.set(key, ExpansionUtils.jsonToJava(value)));
 
         try {
@@ -196,20 +206,4 @@ public class JavascriptPlaceholder {
         this.yaml = null;
     }
 
-    public class JavascriptParser {
-
-        private final OfflinePlayer player;
-
-        public JavascriptParser(OfflinePlayer player) {
-            this.player = player;
-        }
-
-        public String parse(String msg) {
-            return PlaceholderAPI.setPlaceholders(player, msg);
-        }
-
-        public String parseBracket(String msg) {
-            return PlaceholderAPI.setBracketPlaceholders(player, msg);
-        }
-    }
 }
