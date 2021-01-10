@@ -39,56 +39,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/cat.inspiracio/rhino-js-engine -->
         <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-            <version>20.3.0</version>
-            <scope>runtime</scope>
+            <groupId>cat.inspiracio</groupId>
+            <artifactId>rhino-js-engine</artifactId>
+            <version>1.7.10</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine -->
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-            <version>20.3.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.sdk/graal-sdk -->
-        <dependency>
-            <groupId>org.graalvm.sdk</groupId>
-            <artifactId>graal-sdk</artifactId>
-            <version>20.3.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.truffle/truffle-api -->
-        <dependency>
-            <groupId>org.graalvm.truffle</groupId>
-            <artifactId>truffle-api</artifactId>
-            <version>20.3.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.regex/regex -->
-        <dependency>
-            <groupId>org.graalvm.regex</groupId>
-            <artifactId>regex</artifactId>
-            <version>20.3.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.compiler/compiler -->
-        <dependency>
-            <groupId>org.graalvm.compiler</groupId>
-            <artifactId>compiler</artifactId>
-            <version>20.3.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.graalvm.compiler/compiler-management -->
-        <dependency>
-            <groupId>org.graalvm.compiler</groupId>
-            <artifactId>compiler-management</artifactId>
-            <version>20.3.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.graalvm.regex/regex -->
 
     </dependencies>
 

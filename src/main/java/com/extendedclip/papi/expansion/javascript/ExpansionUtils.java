@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.MemorySection;
-import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -67,29 +66,30 @@ public class ExpansionUtils {
     }
 
     protected static Object jsonToJava(Object jsObj) {
-        Value value = Value.asValue(jsObj);
+//        Value value = Value.asValue(jsObj);
 
         if (jsObj instanceof Map) {
-            if (value.hasArrayElements()) {
-                List<Object> list = new ArrayList<>();
-                for (int i = 0; i < value.getArraySize(); i++) {
-                    list.add(jsonToJava(value.getArrayElement(i)));
-                }
-//                for (Map.Entry<String, Object> entry : value.getMemberKeys()) {
-//                    list.add(jsonToJava(entry.getValue()));
+            return jsObj;
+//            if (value.hasArrayElements()) {
+//                List<Object> list = new ArrayList<>();
+//                for (int i = 0; i < value.getArraySize(); i++) {
+//                    list.add(jsonToJava(value.getArrayElement(i)));
 //                }
-                return list;
-            } else {
+////                for (Map.Entry<String, Object> entry : value.getMemberKeys()) {
+////                    list.add(jsonToJava(entry.getValue()));
+////                }
+//                return list;
+//            } else {
+////                Map<String, Object> map = new HashMap<>();
+////                for (Map.Entry<String, Object> entry : value.entrySet()) {
+////                    map.put(entry.getKey(), jsonToJava(entry.getValue()));
+////                }
 //                Map<String, Object> map = new HashMap<>();
-//                for (Map.Entry<String, Object> entry : value.entrySet()) {
-//                    map.put(entry.getKey(), jsonToJava(entry.getValue()));
+//                for (String key : value.getMemberKeys()) {
+//                    map.put(key, jsonToJava(value.getMember(key)));
 //                }
-                Map<String, Object> map = new HashMap<>();
-                for (String key : value.getMemberKeys()) {
-                    map.put(key, jsonToJava(value.getMember(key)));
-                }
-                return map;
-            }
+//                return map;
+//            }
 
         } else {
             return jsObj;

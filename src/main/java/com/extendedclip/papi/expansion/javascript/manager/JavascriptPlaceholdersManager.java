@@ -25,6 +25,7 @@ import com.extendedclip.papi.expansion.javascript.JavascriptExpansion;
 import com.extendedclip.papi.expansion.javascript.JavascriptPlaceholder;
 import com.extendedclip.papi.expansion.javascript.log.LogEnum;
 import com.extendedclip.papi.expansion.javascript.log.LogStatus;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import javax.script.Bindings;
@@ -41,10 +42,12 @@ public class JavascriptPlaceholdersManager {
     private final JavascriptExpansion exp;
     private final FileConfiguration config;
     private final LogStatus status;
+    private final ConfigManager configManager;
 
     public JavascriptPlaceholdersManager(JavascriptExpansion exp) {
         this.exp = exp;
-        this.config = exp.getConfigManager().getConfig();
+        this.configManager = exp.getConfigManager();
+        this.config = configManager.getConfig();
         this.status = new LogStatus();
     }
 
@@ -56,7 +59,7 @@ public class JavascriptPlaceholdersManager {
 
         final File directory = new File(exp.getPlaceholderAPI().getDataFolder(), "javascripts");
         try {
-            addNewDirectory(directory);
+            configManager.addDirectory(directory);
         } catch (IOException e) {
             ExpansionUtils.errorLog("Failed to create 'javascript' directory", e);
         }
@@ -64,20 +67,19 @@ public class JavascriptPlaceholdersManager {
         for (String identifier : config.getKeys(false)) {
 
             final String fileName = config.getString(identifier + ".file");
-            if (!config.contains(identifier + ".file") || fileName == null) {
+            if (fileName == null || !config.contains(identifier + ".file")) {
                 status.addLog(identifier, LogEnum.FAILED_SPEC);
                 continue;
             }
 
+            Bukkit.broadcastMessage("File name: " + fileName);
             final File scriptFile = new File(exp.getPlaceholderAPI().getDataFolder() + "/javascripts", fileName);
 
             if (!scriptFile.exists()) {
                 ExpansionUtils.infoLog(scriptFile.getName() + " does not exist. Creating one for you...");
 
                 try {
-                    boolean canAdd = addNewDirectory(scriptFile.getParentFile());
-//                    scriptFile.getParentFile().mkdir();
-//                    scriptFile.createNewFile();
+                    boolean canAdd = configManager.addFile(scriptFile);
                     if (canAdd) {
                         status.addLog(scriptFile.getName(), LogEnum.SUCCESSFUL_FILE);
                     }
@@ -206,18 +208,6 @@ public class JavascriptPlaceholdersManager {
             ExpansionUtils.warnLog(failedPlaceholder.size() + " Javascript placeholder" + ExpansionUtils.plural(failedPlaceholder.size()) + " have duplicated items"
                     + debugMsg, null);
         }
-
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private boolean addNewDirectory(File directory) throws IOException {
-
-        if (!directory.exists()) {
-            directory.mkdirs();
-            return true;
-        }
-
-        return false;
 
     }
 

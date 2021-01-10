@@ -3,6 +3,7 @@ package com.extendedclip.papi.expansion.javascript.manager;
 import com.extendedclip.papi.expansion.javascript.ExpansionUtils;
 import com.extendedclip.papi.expansion.javascript.JavascriptExpansion;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -78,6 +79,29 @@ public class ConfigManager {
         } catch (IOException ex) {
             ExpansionUtils.warnLog("Could not save to " + file, ex);
         }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public boolean addDirectory(File directory) throws IOException {
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+            return true;
+        }
+        return false;
+
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public boolean addFile(File file) throws IOException {
+        if (!file.exists()) {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdir();
+            }
+            file.createNewFile();
+            return true;
+        }
+        return false;
     }
 
     public FileConfiguration getConfig() {
