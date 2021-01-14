@@ -39,11 +39,17 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/cat.inspiracio/rhino-js-engine -->
         <dependency>
-            <groupId>cat.inspiracio</groupId>
-            <artifactId>rhino-js-engine</artifactId>
-            <version>1.7.10</version>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>20.3.0</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>20.3.0</version>
         </dependency>
 
     </dependencies>

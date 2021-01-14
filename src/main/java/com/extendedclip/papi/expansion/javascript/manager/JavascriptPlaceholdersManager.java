@@ -25,7 +25,6 @@ import com.extendedclip.papi.expansion.javascript.JavascriptExpansion;
 import com.extendedclip.papi.expansion.javascript.JavascriptPlaceholder;
 import com.extendedclip.papi.expansion.javascript.log.LogEnum;
 import com.extendedclip.papi.expansion.javascript.log.LogStatus;
-import jdk.jfr.internal.LogLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -38,7 +37,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class JavascriptPlaceholdersManager {
 
@@ -75,7 +73,6 @@ public class JavascriptPlaceholdersManager {
                 continue;
             }
 
-            Bukkit.broadcastMessage("File name: " + fileName);
             final File scriptFile = new File(exp.getPlaceholderAPI().getDataFolder() + "/javascripts", fileName);
 
             if (!scriptFile.exists()) {
