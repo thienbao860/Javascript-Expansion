@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 public class ExpansionUtils {
 
-    public static final String DEFAULT_ENGINE = "graal.js";
     public static final String PREFIX = "[PAPI] [Javascript-Expansion] ";
     private static final Logger logger = Bukkit.getLogger();
 

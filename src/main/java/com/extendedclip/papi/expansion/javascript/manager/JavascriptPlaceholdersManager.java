@@ -25,13 +25,8 @@ import com.extendedclip.papi.expansion.javascript.JavascriptExpansion;
 import com.extendedclip.papi.expansion.javascript.JavascriptPlaceholder;
 import com.extendedclip.papi.expansion.javascript.log.LogEnum;
 import com.extendedclip.papi.expansion.javascript.log.LogStatus;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -97,29 +92,7 @@ public class JavascriptPlaceholdersManager {
                 continue;
             }
 
-            ScriptEngine engine;
-            if (!config.contains(identifier + ".engine")) {
-                engine = exp.getGlobalEngine();
-                status.addLog(identifier, LogEnum.EMPTY_ENGINE);
-            } else {
-                try {
-                   engine = new ScriptEngineManager(null).getEngineByName(config.getString(identifier + ".engine", ExpansionUtils.DEFAULT_ENGINE));
-                } catch (NullPointerException e) {
-                    status.addLog(identifier, LogEnum.INVALID_ENGINE);
-                    engine = exp.getGlobalEngine();
-                }
-            }
-
-            if (engine == null) {
-                status.addLog(identifier, LogEnum.FAILED_ENGINE);
-                continue;
-            }
-
-            Bindings bindings = engine.createBindings();
-            bindings.put("polyglot.js.allowAllAccess", true);
-            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-
-            final JavascriptPlaceholder placeholder = new JavascriptPlaceholder(engine, identifier, script);
+            final JavascriptPlaceholder placeholder = new JavascriptPlaceholder(identifier, script);
             final boolean added = exp.addJSPlaceholder(placeholder);
 
             if (added) {
@@ -142,9 +115,6 @@ public class JavascriptPlaceholdersManager {
         printLog(LogEnum.SUCCESSFUL_FILE, "have created their files! Add your script to these files and use '/jsexpansion reload' to load them!", Level.INFO);
         printLog(LogEnum.FAILED_CREATE, "have a problem when creating their files!", Level.SEVERE);
         printLog(LogEnum.EMPTY_FILE, "have empty scripts", Level.WARNING);
-        printLog(LogEnum.EMPTY_ENGINE, "have not initialized their ScriptEngine!", Level.WARNING);
-        printLog(LogEnum.INVALID_ENGINE, "have an invalid ScriptEngine and will be defaulted to global engine", Level.WARNING);
-        printLog(LogEnum.FAILED_ENGINE, "have failed to set ScriptEngine!", Level.SEVERE);
         printLog(LogEnum.LOADED_DATA, "have loaded their data!", Level.INFO);
         printLog(LogEnum.LOADED_PLACEHOLDER, "have loaded their placeholders!", Level.INFO);
         printLog(LogEnum.FAILED_PLACEHOLDER, "have failed to load their placeholders!", Level.SEVERE);

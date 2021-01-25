@@ -22,6 +22,7 @@ package com.extendedclip.papi.expansion.javascript;
 
 import com.extendedclip.papi.expansion.javascript.parser.JavascriptParser;
 import com.extendedclip.papi.expansion.javascript.parser.UtilityParser;
+import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.apache.commons.lang.Validate;
@@ -29,17 +30,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
 public class JavascriptPlaceholder {
 
-    private final ScriptEngine engine;
+    private Context context;
     private final String identifier;
     private final String script;
     private ScriptData scriptData;
@@ -48,14 +49,12 @@ public class JavascriptPlaceholder {
     private boolean firstInit;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public JavascriptPlaceholder(final ScriptEngine engine, String identifier, String script) {
-        Validate.notNull(engine, "ScriptEngine can not be null");
+    public JavascriptPlaceholder(String identifier, String script) {
         Validate.notNull(identifier, "Identifier can not be null");
         Validate.notNull(script, "Script can not be null");
 
         String dir = PlaceholderAPIPlugin.getInstance().getDataFolder() + "/javascripts/javascript_data";
         this.firstInit = true;
-        this.engine = engine;
         this.identifier = identifier;
         this.script = script;
         final File directory = new File(dir);
@@ -66,13 +65,21 @@ public class JavascriptPlaceholder {
 
         scriptData = new ScriptData();
         dataFile = new File(directory, identifier + "_data.yml");
-        this.engine.put("Data", scriptData);
-        this.engine.put("DataVar", scriptData.getData());
-        this.engine.put("BukkitServer", Bukkit.getServer());
-        this.engine.put("Expansion", JavascriptExpansion.getInstance());
-        this.engine.put("Placeholder", this);
-        this.engine.put("PlaceholderAPI", PlaceholderAPI.class);
-        this.engine.put("UtilityParser", UtilityParser.getInstance());
+        this.context = Context.newBuilder("js")
+                .allowAllAccess(true)
+                .allowExperimentalOptions(true)
+                .allowHostAccess(HostAccess.ALL)
+                .allowHostClassLoading(true)
+                .option("js.ecmascript-version", "2020").build();
+
+        Value binding = context.getBindings("js");
+        binding.putMember("Data", scriptData);
+        binding.putMember("DataVar", scriptData.getData());
+        binding.putMember("BukkitServer", Bukkit.getServer());
+        binding.putMember("Expansion", JavascriptExpansion.getInstance());
+        binding.putMember("Placeholder", this);
+        binding.putMember("PlaceholderAPI", PlaceholderAPI.class);
+        binding.putMember("UtilityParser", UtilityParser.getInstance());
     }
 
     public String getIdentifier() {
@@ -80,6 +87,8 @@ public class JavascriptPlaceholder {
     }
 
     public String evaluate(OfflinePlayer player, String... args) {
+
+        Value binding = context.getBindings("js");
 
         try {
             String[] arguments = null;
@@ -99,29 +108,25 @@ public class JavascriptPlaceholder {
                 arguments = new String[]{};
             }
 
-            engine.put("args", arguments);
+            binding.putMember("args", arguments);
 
             if (player != null && player.isOnline()) {
-                engine.put("BukkitPlayer", player.getPlayer());
-                engine.put("Player", player.getPlayer());
+                binding.putMember("BukkitPlayer", player.getPlayer());
+                binding.putMember("Player", player.getPlayer());
             }
 
-            engine.put("OfflinePlayer", player);
-            engine.put("Parser", new JavascriptParser(player));
-            Object result = engine.eval(script);
-            result = ExpansionUtils.jsonToJava(result);
+            binding.putMember("OfflinePlayer", player);
+            binding.putMember("Parser", new JavascriptParser(player));
+            Value val = context.eval("js", script);
+            Object result = ExpansionUtils.jsonToJava(val);
 
             if (firstInit) {
                 firstInit = false;
-                Invocable inv = (Invocable) engine;
-                try {
-                    inv.invokeFunction("firstInit");
-                } catch (ScriptException | NoSuchMethodException ignored) { }
             }
 
             return result != null ? PlaceholderAPI.setPlaceholders(player, result.toString()) : "";
 
-        } catch (ScriptException ex) {
+        } catch (IllegalStateException ex) {
             ExpansionUtils.errorLog("An error occurred while executing the script '" + identifier + "':\n\t" + ex.getMessage(), null);
         } catch (ArrayIndexOutOfBoundsException ex) {
             ExpansionUtils.errorLog("Argument out of bound while executing script '" + identifier + "':\n\t" + ex.getMessage(), null);

@@ -84,7 +84,6 @@ public class GithubScriptManager {
             Bukkit.getScheduler().runTask(expansion.getPlaceholderAPI(), () -> {
                 ConfigManager config = expansion.getConfigManager();
                 config.loadData().set(script.getName() + ".file", script.getName() + ".js");
-                config.loadData().set(script.getName() + ".engine", "javascript");
 
                 config.saveData();
             });

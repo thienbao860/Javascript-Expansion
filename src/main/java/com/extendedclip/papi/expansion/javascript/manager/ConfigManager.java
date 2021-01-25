@@ -47,18 +47,15 @@ public class ConfigManager {
                 + "\n"
                 + "\n<identifier>:"
                 + "\n  file: <name of file>.<file extension>"
-                + "\n  engine: (name of script engine)"
                 + "\n"
                 + "\n"
                 + "\nExample:"
                 + "\n"
                 + "\n'my_placeholder':"
-                + "\n  file: 'my_placeholder.js'"
-                + "\n  engine: 'nashorn'");
+                + "\n  file: 'my_placeholder.js'");
 
         if (config.getKeys(false).isEmpty()) {
             config.set("example.file", "example.js");
-            config.set("example.engine", ExpansionUtils.DEFAULT_ENGINE);
         }
 
         saveData();

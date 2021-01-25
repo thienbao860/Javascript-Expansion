@@ -23,10 +23,13 @@ package com.extendedclip.papi.expansion.javascript;
 import com.extendedclip.papi.expansion.javascript.cloud.GithubScriptManager;
 import com.extendedclip.papi.expansion.javascript.manager.ConfigManager;
 import com.extendedclip.papi.expansion.javascript.manager.JavascriptPlaceholdersManager;
+import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import me.clip.placeholderapi.expansion.Cacheable;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import javax.script.*;
@@ -34,8 +37,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JavascriptExpansion extends PlaceholderExpansion implements Cacheable, Configurable {
-
-    private ScriptEngine globalEngine = null;
 
     private JavascriptPlaceholdersManager config;
     private final Set<JavascriptPlaceholder> scripts;
@@ -52,6 +53,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         this.VERSION = getClass().getPackage().getImplementationVersion();
         this.scripts = new HashSet<>();
         this.confManager = new ConfigManager(this);
+
     }
 
     @Override
@@ -72,34 +74,19 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
     @Override
     public boolean register() {
 
-        String defaultEngine = ExpansionUtils.DEFAULT_ENGINE;
-
-        if (globalEngine == null) {
-            try {
-                globalEngine = new ScriptEngineManager(null).getEngineByName(getString("engine", defaultEngine));
-            }
-            catch (NullPointerException ex) {
-                ExpansionUtils.warnLog("Javascript engine type was invalid! Defaulting to '" + defaultEngine + "'", null);
-                globalEngine = new ScriptEngineManager(null).getEngineByName(defaultEngine);
-            }
-
-            System.setProperty("polyglot.js.nashorn-compat", "true");
-            Bindings bindings = globalEngine.createBindings();
-            bindings.put("polyglot.js.allowAllAccess", true);
-            globalEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-
-        }
+        ScriptEngineManager scManager = new ScriptEngineManager();
+        boolean tru = PluginClassLoader
+        Bukkit.broadcastMessage()
+        Thread.currentThread().setContextClassLoader(((JavaPlugin) getPlaceholderAPI()).
+        GraalJSScriptEngine engine = GraalJSScriptEngine.create();
+        scManager.registerEngineName("javascript", engine.getFactory());
+        scManager.registerEngineName("nashorn", engine.getFactory());
 
         argument_split = getConfigManager().getSplitStr();
         if (argument_split.equals("_")) {
             argument_split = ",";
             ExpansionUtils.warnLog("Underscore character ('_') will not be allowed for splitting. Defaulting to ',' for this", null);
         }
-
-        config = new JavascriptPlaceholdersManager(this);
-
-        int amountLoaded = config.loadPlaceholders();
-        ExpansionUtils.infoLog(amountLoaded + " script" + ExpansionUtils.plural(amountLoaded) + " loaded!");
 
 
         if (getConfigManager().debugModeEnabled()) {
@@ -119,6 +106,11 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
                 System.out.println("  Names: " + String.join(", ", factory.getNames()));
             }
         }
+
+        config = new JavascriptPlaceholdersManager(this);
+
+        int amountLoaded = config.loadPlaceholders();
+        ExpansionUtils.infoLog(amountLoaded + " script" + ExpansionUtils.plural(amountLoaded) + " loaded!");
 
         if (getConfigManager().gitDownloadEnabled()) {
             githubManager = new GithubScriptManager(this);
@@ -146,7 +138,6 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         }
 
         scripts.clear();
-        globalEngine = null;
         instance = null;
     }
 
@@ -212,10 +203,6 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         return scripts.size();
     }
 
-    public ScriptEngine getGlobalEngine() {
-        return globalEngine;
-    }
-
     public JavascriptPlaceholdersManager getConfig() {
         return config;
     }
@@ -223,7 +210,6 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
     @Override
     public Map<String, Object> getDefaults() {
         final Map<String, Object> defaults = new HashMap<>();
-        defaults.put("engine", "javascript");
         defaults.put("debug", false);
         defaults.put("argument_split", ",");
         defaults.put("github_script_downloads", false);
