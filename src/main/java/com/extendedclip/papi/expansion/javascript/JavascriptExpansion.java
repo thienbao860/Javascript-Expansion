@@ -23,21 +23,21 @@ package com.extendedclip.papi.expansion.javascript;
 import com.extendedclip.papi.expansion.javascript.cloud.GithubScriptManager;
 import com.extendedclip.papi.expansion.javascript.manager.ConfigManager;
 import com.extendedclip.papi.expansion.javascript.manager.JavascriptPlaceholdersManager;
-import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
+import com.oracle.truffle.api.Truffle;
 import me.clip.placeholderapi.expansion.Cacheable;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import javax.script.*;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class JavascriptExpansion extends PlaceholderExpansion implements Cacheable, Configurable {
 
+    private final ScriptEngineManager manager;
     private JavascriptPlaceholdersManager config;
     private final Set<JavascriptPlaceholder> scripts;
     private final String VERSION;
@@ -54,6 +54,19 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
         this.scripts = new HashSet<>();
         this.confManager = new ConfigManager(this);
 
+//        PlaceholderAPIPlugin plugin = getPlaceholderAPI();
+//        try {
+//            Method m = getPlaceholderAPI().getClass().getSuperclass().getDeclaredMethod("getClassLoader");
+//            m.setAccessible(true);
+//            Thread.currentThread().setContextClassLoader((ClassLoader) m.invoke(plugin));
+//        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Thread.currentThread().setContextClassLoader(getPlaceholderAPI().getClass().getSuperclass().getClassLoader());
+        final Class<Truffle> truffle = Truffle.class;
+
+        this.manager = new ScriptEngineManager();
     }
 
     @Override
@@ -68,32 +81,24 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
 
     @Override
     public String getVersion() {
-        return VERSION;
+        return "1.7.0";
     }
 
     @Override
     public boolean register() {
 
-        ScriptEngineManager scManager = new ScriptEngineManager();
-        boolean tru = PluginClassLoader
-        Bukkit.broadcastMessage()
-        Thread.currentThread().setContextClassLoader(((JavaPlugin) getPlaceholderAPI()).
-        GraalJSScriptEngine engine = GraalJSScriptEngine.create();
-        scManager.registerEngineName("javascript", engine.getFactory());
-        scManager.registerEngineName("nashorn", engine.getFactory());
+        this.argument_split = getConfigManager().getSplitStr();
 
-        argument_split = getConfigManager().getSplitStr();
         if (argument_split.equals("_")) {
             argument_split = ",";
             ExpansionUtils.warnLog("Underscore character ('_') will not be allowed for splitting. Defaulting to ',' for this", null);
         }
 
-
         if (getConfigManager().debugModeEnabled()) {
             ExpansionUtils.infoLog("Java version: " + System.getProperty("java.version"));
-    
-            final ScriptEngineManager manager = new ScriptEngineManager(null);
+
             final List<ScriptEngineFactory> factories = manager.getEngineFactories();
+
             ExpansionUtils.infoLog("Displaying all script engine factories.", false);
 
             for (ScriptEngineFactory factory : factories) {
@@ -107,7 +112,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
             }
         }
 
-        config = new JavascriptPlaceholdersManager(this);
+        this.config = new JavascriptPlaceholdersManager(this);
 
         int amountLoaded = config.loadPlaceholders();
         ExpansionUtils.infoLog(amountLoaded + " script" + ExpansionUtils.plural(amountLoaded) + " loaded!");
@@ -117,7 +122,7 @@ public class JavascriptExpansion extends PlaceholderExpansion implements Cacheab
             githubManager.fetch();
         }
 
-        commands = new JavascriptExpansionCommands(this);
+        this.commands = new JavascriptExpansionCommands(this);
         commands.registerCommand();
 
         return super.register();
